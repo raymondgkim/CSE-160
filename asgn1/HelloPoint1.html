@@ -3,16 +3,131 @@
   <head>
     <meta charset="utf-8" />
     <title>Draw a point (1)</title>
+    <style>
+      body { background: #222; color: #fff; font-family: sans-serif; }
+      canvas { display: block; margin: 10px auto; border: 1px solid #555; }
+      #controls {
+        width: 400px;
+        margin: 0 auto 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .slider-row label { width: 60px; }
+      .slider-row input  { flex: 1; }
+      .slider-row span   { width: 36px; text-align: right; }
+      .button-row {
+        display: flex;
+        gap: 8px;
+      }
+      .shape-btn {
+        flex: 1;
+        padding: 6px;
+        background: #444;
+        color: #fff;
+        border: 2px solid #666;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 4px;
+      }
+      .shape-btn.active {
+        background: #2980b9;
+        border-color: #3498db;
+      }
+      #btn-clear {
+        margin: 0 auto 6px;
+        display: block;
+        width: 400px;
+        padding: 6px;
+        background: #c0392b;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 4px;
+      }
+      #btn-clear:hover { background: #e74c3c; }
+    </style>
   </head>
-
   <body onload="main()">
+
+    <div id="controls">
+      <div class="slider-row">
+        <label>Red</label>
+        <input id="slider_r" type="range" min="0" max="255" value="255"
+               oninput="document.getElementById('val_r').textContent = this.value">
+        <span id="val_r">255</span>
+      </div>
+      <div class="slider-row">
+        <label>Green</label>
+        <input id="slider_g" type="range" min="0" max="255" value="255"
+               oninput="document.getElementById('val_g').textContent = this.value">
+        <span id="val_g">255</span>
+      </div>
+      <div class="slider-row">
+        <label>Blue</label>
+        <input id="slider_b" type="range" min="0" max="255" value="255"
+               oninput="document.getElementById('val_b').textContent = this.value">
+        <span id="val_b">255</span>
+      </div>
+      <div class="slider-row">
+        <label>Size</label>
+        <input id="slider_size" type="range" min="1" max="50" value="10"
+               oninput="document.getElementById('val_size').textContent = this.value">
+        <span id="val_size">10</span>
+      </div>
+      <div class="slider-row">
+        <label>Segs</label>
+        <input id="slider_seg" type="range" min="3" max="64" value="10"
+               oninput="document.getElementById('val_seg').textContent = this.value">
+        <span id="val_seg">10</span>
+      </div>
+      <div class="button-row">
+        <button class="shape-btn active" id="btn-point"
+                onclick="g_selectedShape='point'; setActiveBtn('btn-point')">Point</button>
+        <button class="shape-btn" id="btn-triangle"
+                onclick="g_selectedShape='triangle'; setActiveBtn('btn-triangle')">Triangle</button>
+        <button class="shape-btn" id="btn-circle"
+                onclick="g_selectedShape='circle'; setActiveBtn('btn-circle')">Circle</button>
+      </div>
+    </div>
+
+    <button id="btn-clear" onclick="clearCanvas()">Clear Canvas</button>
+
+    <button id="btn-picture" onclick="drawPicture()"
+        style="margin: 0 auto 6px; display: block; width: 400px; padding: 6px;
+               background: #27ae60; color: #fff; border: none; cursor: pointer;
+               font-size: 14px; border-radius: 4px;">
+      Draw Picture
+    </button>
+
     <canvas id="webgl" width="400" height="400">
-    Please use a browser that supports "canvas"
+      Please use a browser that supports "canvas"
     </canvas>
+
+    <div style="text-align: center;">
+      <img src="./asgn1img2.jpg" width="300" />
+    </div>
 
     <script src="./lib/webgl-utils.js"></script>
     <script src="./lib/webgl-debug.js"></script>
     <script src="./lib/cuon-utils.js"></script>
-    <script src="HelloPoint1.js"></script>
+    <script src="./Triangle.js"></script>
+    <script src="./Circle.js"></script>
+    <script src="./ColoredPoints.js"></script>
+
+    <script>
+      function setActiveBtn(activeId) {
+        document.getElementById('btn-point').classList.remove('active');
+        document.getElementById('btn-triangle').classList.remove('active');
+        document.getElementById('btn-circle').classList.remove('active');
+        document.getElementById(activeId).classList.add('active');
+      }
+    </script>
   </body>
 </html>
