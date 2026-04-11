@@ -1,95 +1,199 @@
-// ColoredPoint.js (c) 2012 matsuda
+// ColoredPoints.js (c) 2012 matsuda
 // Vertex shader program
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
+  'uniform float u_Size;\n' +
   'void main() {\n' +
   '  gl_Position = a_Position;\n' +
-  '  gl_PointSize = 10.0;\n' +
+  '  gl_PointSize = u_Size;\n' +
   '}\n';
 
 // Fragment shader program
 var FSHADER_SOURCE =
   'precision mediump float;\n' +
-  'uniform vec4 u_FragColor;\n' +  // uniform変数
+  'uniform vec4 u_FragColor;\n' +
   'void main() {\n' +
   '  gl_FragColor = u_FragColor;\n' +
   '}\n';
 
-function main() {
-  // Retrieve <canvas> element
-  var canvas = document.getElementById('webgl');
+// Global variables
+var gl;
+var canvas;
+var a_Position;
+var u_FragColor;
+var u_Size;
 
-  // Get the rendering context for WebGL
-  var gl = getWebGLContext(canvas);
+var shapesList = [];
+var g_selectedShape = 'point';
+
+function main() {
+  setupWebGL();
+  connectVariablesToGLSL();
+
+  canvas.onmousedown = function(ev) { click(ev); };
+  canvas.onmousemove = function(ev) { if (ev.buttons == 1) click(ev); };
+
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+}
+
+function setupWebGL() {
+  canvas = document.getElementById('webgl');
+  gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+}
 
-  // Initialize shaders
+function connectVariablesToGLSL() {
   if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-    console.log('Failed to intialize shaders.');
+    console.log('Failed to initialize shaders.');
     return;
   }
 
-  // // Get the storage location of a_Position
-  var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  a_Position = gl.getAttribLocation(gl.program, 'a_Position');
   if (a_Position < 0) {
     console.log('Failed to get the storage location of a_Position');
     return;
   }
 
-  // Get the storage location of u_FragColor
-  var u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+  u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
   if (!u_FragColor) {
     console.log('Failed to get the storage location of u_FragColor');
     return;
   }
 
-  // Register function (event handler) to be called on a mouse press
-  canvas.onmousedown = function(ev){ click(ev, gl, canvas, a_Position, u_FragColor) };
-
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  u_Size = gl.getUniformLocation(gl.program, 'u_Size');
+  if (!u_Size) {
+    console.log('Failed to get the storage location of u_Size');
+    return;
+  }
 }
 
-var g_points = [];  // The array for the position of a mouse press
-var g_colors = [];  // The array to store the color of a point
-function click(ev, gl, canvas, a_Position, u_FragColor) {
-  var x = ev.clientX; // x coordinate of a mouse pointer
-  var y = ev.clientY; // y coordinate of a mouse pointer
+function click(ev) {
+  var x = ev.clientX;
+  var y = ev.clientY;
   var rect = ev.target.getBoundingClientRect();
 
-  x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
-  y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
+  x = ((x - rect.left) - canvas.width  / 2) / (canvas.width  / 2);
+  y = (canvas.height / 2 - (y - rect.top))  / (canvas.height / 2);
 
-  // Store the coordinates to g_points array
-  g_points.push([x, y]);
-  // Store the coordinates to g_points array
-  if (x >= 0.0 && y >= 0.0) {      // First quadrant
-    g_colors.push([1.0, 0.0, 0.0, 1.0]);  // Red
-  } else if (x < 0.0 && y < 0.0) { // Third quadrant
-    g_colors.push([0.0, 1.0, 0.0, 1.0]);  // Green
-  } else {                         // Others
-    g_colors.push([1.0, 1.0, 1.0, 1.0]);  // White
+  var r = parseFloat(document.getElementById('slider_r').value) / 255.0;
+  var g = parseFloat(document.getElementById('slider_g').value) / 255.0;
+  var b = parseFloat(document.getElementById('slider_b').value) / 255.0;
+  var size = parseFloat(document.getElementById('slider_size').value);
+
+  if (g_selectedShape == 'point') {
+    shapesList.push(new Point(x, y, [r, g, b, 1.0], size));
+  } else if (g_selectedShape == 'triangle') {
+    shapesList.push(new Triangle(x, y, [r, g, b, 1.0], size));
+  } else if (g_selectedShape == 'circle') {
+    var segs = parseInt(document.getElementById('slider_seg').value);
+    shapesList.push(new Circle(x, y, [r, g, b, 1.0], size, segs));
   }
 
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  renderAllShapes();
+}
 
-  var len = g_points.length;
-  for(var i = 0; i < len; i++) {
-    var xy = g_points[i];
-    var rgba = g_colors[i];
+// Point class
+class Point {
+  constructor(x, y, color, size) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.size = size;
+  }
 
-    // Pass the position of a point to a_Position variable
-    gl.vertexAttrib3f(a_Position, xy[0], xy[1], 0.0);
-    // Pass the color of a point to u_FragColor variable
-    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-    // Draw
+  render() {
+    gl.disableVertexAttribArray(a_Position);
+    gl.vertexAttrib3f(a_Position, this.x, this.y, 0.0);
+    gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+    gl.uniform1f(u_Size, this.size);
     gl.drawArrays(gl.POINTS, 0, 1);
   }
+}
+
+function renderAllShapes() {
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  for (var i = 0; i < shapesList.length; i++) {
+    shapesList[i].render();
+  }
+}
+
+function clearCanvas() {
+  shapesList = [];
+  renderAllShapes();
+}
+
+function drawPicture() {
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  function drawRect(x1, y1, x2, y2, color) {
+    gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
+    drawTriangle([x1, y1,  x2, y1,  x1, y2]);
+    drawTriangle([x2, y1,  x2, y2,  x1, y2]);
+  }
+
+  var g = [0.35, 0.65, 0.15, 1.0];   // green
+  var y = [0.95, 0.85, 0.05, 1.0];   // yellow
+  var b = [0.2,  0.3,  0.5,  1.0];   // blue/grey window
+  var br = [0.4, 0.2,  0.05, 1.0];   // brown wheels
+  var bl = [0.0, 0.0,  0.0,  1.0];   // black (background cuts)
+
+  // --- Main green body (big rectangle) ---
+  drawRect(-0.8, -0.15, 0.8, 0.65, g);
+
+  // --- Top-left diagonal corner ---
+  gl.uniform4f(u_FragColor, bl[0], bl[1], bl[2], bl[3]);
+  drawTriangle([-0.8, 0.65,  -0.6, 0.65,  -0.8, 0.45]);
+
+  // --- Top-right diagonal corner ---
+  drawTriangle([0.65, 0.65,   0.8, 0.65,   0.8, 0.45]);
+
+  // --- Bottom-left diagonal corner ---
+  drawTriangle([-0.8, -0.15,  -0.6, -0.15,  -0.8, 0.05]);
+
+  // --- Bottom-right diagonal corner ---
+  drawTriangle([0.65, -0.15,   0.8, -0.15,   0.8, 0.05]);
+
+  // --- Blue/grey window top-left ---
+  drawRect(-0.78, 0.3, -0.45, 0.62, b);
+
+  // --- Yellow headlight (triangle pointing right) ---
+  gl.uniform4f(u_FragColor, y[0], y[1], y[2], y[3]);
+  drawTriangle([-0.78, 0.05,  -0.78, 0.28,  -0.45, 0.15]);
+
+  // --- R letter ---
+  // vertical bar
+  drawRect(-0.35, -0.05, -0.22, 0.55, y);
+  // top horizontal
+  drawRect(-0.35, 0.38,   0.0,  0.55, y);
+  // middle horizontal
+  drawRect(-0.35, 0.22,   0.0,  0.38, y);
+  // diagonal leg
+  gl.uniform4f(u_FragColor, y[0], y[1], y[2], y[3]);
+  drawTriangle([-0.22, 0.22,  0.0, 0.22,  0.0, -0.05]);
+
+  // --- K letter ---
+  // vertical bar
+  drawRect(0.08, -0.05, 0.2, 0.55, y);
+  // top diagonal arm
+  gl.uniform4f(u_FragColor, y[0], y[1], y[2], y[3]);
+  drawTriangle([0.2, 0.28,  0.55, 0.55,  0.2, 0.55]);
+  // bottom diagonal arm
+  drawTriangle([0.2, 0.28,  0.55, -0.05,  0.2, -0.05]);
+
+  // --- Left wheel (trapezoid shape) ---
+  drawRect(-0.62, -0.55, -0.25, -0.15, br);
+  // corner cuts on wheel
+  gl.uniform4f(u_FragColor, bl[0], bl[1], bl[2], bl[3]);
+  drawTriangle([-0.62, -0.55,  -0.44, -0.55,  -0.62, -0.38]);
+  drawTriangle([-0.25, -0.55,  -0.44, -0.55,  -0.25, -0.38]);
+
+  // --- Right wheel ---
+  drawRect(0.22, -0.55, 0.6, -0.15, br);
+  gl.uniform4f(u_FragColor, bl[0], bl[1], bl[2], bl[3]);
+  drawTriangle([0.22, -0.55,  0.41, -0.55,  0.22, -0.38]);
+  drawTriangle([0.6,  -0.55,  0.41, -0.55,  0.6,  -0.38]);
 }
