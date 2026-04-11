@@ -114,6 +114,18 @@ class Point {
   }
 }
 
+function drawTriangle(vertices) {
+  var n = 3; 
+  var vertexBuffer = gl.createBuffer(); // Create a buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+
+  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(a_Position); // IMPORTANT: You must re-enable this!
+  
+  gl.drawArrays(gl.TRIANGLES, 0, n);
+}
+
 function renderAllShapes() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   for (var i = 0; i < shapesList.length; i++) {
