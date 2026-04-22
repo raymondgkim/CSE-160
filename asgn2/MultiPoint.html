@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Draw Multiple Points</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+
+    <br>Global Rotation: <input type="range" min="0" max="360" value="0" id="globalRotSlider">
+    <br>Back Left Leg: <input type="range" min="-45" max="45" value="0" id="backLeftLegSlider">
+    <br>Front Left Thigh: <input type="range" min="-45" max="45" value="0" id="frontLeftThighSlider">
+    <br>Front Left Calf: <input type="range" min="-45" max="45" value="0" id="frontLeftCalfSlider">
+    <br><button id="animBtn">Start Animation</button>
+    <br>FPS: <span id="fpsDisplay">0</span>
+
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="lib/cuon-matrix.js"></script>
+    <script src="MultiPoint.js"></script>
+  </body>
+</html>
