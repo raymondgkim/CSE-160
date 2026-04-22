@@ -316,13 +316,20 @@ function updateAnimationAngles() {
   // Wag tail
   g_tailAngle = -20 + 15 * Math.sin(g_seconds * 4);
 
-  // Front left and back right move together
+  // Left legs move together
   g_frontLeftThighAngle = 25 * Math.sin(g_seconds * 3);
-  g_backRightLegAngle = 35 * Math.sin(g_seconds * 3);
+  g_backLeftLegAngle = 35 * Math.sin(g_seconds * 3);
 
-  // Front right and back left move together, offset by half cycle
+  // Right legs move together, opposite to left
   g_frontRightLegAngle = 25 * Math.sin(g_seconds * 3 + Math.PI);
-  g_backLeftLegAngle = 35 * Math.sin(g_seconds * 3 + Math.PI);
+  g_backRightLegAngle = 35 * Math.sin(g_seconds * 3 + Math.PI);
+  
+  // Paws match their side
+  g_frontLeftPawAngle = 15 * Math.sin(g_seconds * 3);
+  g_backLeftPawAngle = 15 * Math.sin(g_seconds * 3);
+
+  g_frontRightPawAngle = 15 * Math.sin(g_seconds * 3 + Math.PI);
+  g_backRightPawAngle = 15 * Math.sin(g_seconds * 3 + Math.PI);
 
   g_frontLeftPawAngle = 15 * Math.sin(g_seconds * 3);
   g_frontRightPawAngle = 15 * Math.sin(g_seconds * 3 + Math.PI);
