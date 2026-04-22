@@ -254,7 +254,7 @@ function renderScene() {
   var backLeftLeg = new Matrix4();
   backLeftLeg.setTranslate(-0.1, g_bodyBob + g_sitDropY - 0.05, 0.12);
   backLeftLeg.rotate(g_sitAngle, 0, 0, 1);
-  backLeftLeg.translate(-0.15, -0.25, 0);
+  backLeftLeg.translate(-0.15, -0.30, 0);
   backLeftLeg.rotate(g_backLeftLegAngle, 0, 0, 1);
   backLeftLeg.scale(0.07, 0.18, 0.07);
   drawCube(backLeftLeg, grey);
@@ -263,7 +263,7 @@ function renderScene() {
   var backRightLeg = new Matrix4();
   backRightLeg.setTranslate(-0.1, g_bodyBob + g_sitDropY - 0.05, -0.12);
   backRightLeg.rotate(g_sitAngle, 0, 0, 1);
-  backRightLeg.translate(-0.15, -0.25, 0);
+  backRightLeg.translate(-0.15, -0.30, 0);
   backRightLeg.rotate(g_backRightLegAngle, 0, 0, 1);
   backRightLeg.scale(0.07, 0.18, 0.07);
   drawCube(backRightLeg, grey);
