@@ -318,11 +318,11 @@ function updateAnimationAngles() {
 
   // Front left and back right move together
   g_frontLeftThighAngle = 25 * Math.sin(g_seconds * 3);
-  g_backRightLegAngle = 25 * Math.sin(g_seconds * 3);
+  g_backRightLegAngle = 35 * Math.sin(g_seconds * 3);
 
   // Front right and back left move together, offset by half cycle
   g_frontRightLegAngle = 25 * Math.sin(g_seconds * 3 + Math.PI);
-  g_backLeftLegAngle = 25 * Math.sin(g_seconds * 3 + Math.PI);
+  g_backLeftLegAngle = 35 * Math.sin(g_seconds * 3 + Math.PI);
 
   g_frontLeftPawAngle = 15 * Math.sin(g_seconds * 3);
   g_frontRightPawAngle = 15 * Math.sin(g_seconds * 3 + Math.PI);
