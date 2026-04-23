@@ -318,11 +318,11 @@ function updateAnimationAngles() {
 
   // Left legs move together
   g_frontLeftThighAngle = 25 * Math.sin(g_seconds * 3);
-  g_backLeftLegAngle = 35 * Math.sin(g_seconds * 3);
+  g_backLeftLegAngle = 43 * Math.sin(g_seconds * 3);
 
   // Right legs move together, opposite to left
   g_frontRightLegAngle = 25 * Math.sin(g_seconds * 3 + Math.PI);
-  g_backRightLegAngle = 35 * Math.sin(g_seconds * 3 + Math.PI);
+  g_backRightLegAngle = 43 * Math.sin(g_seconds * 3 + Math.PI);
   
   // Paws match their side
   g_frontLeftPawAngle = 15 * Math.sin(g_seconds * 3);
